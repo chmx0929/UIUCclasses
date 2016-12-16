@@ -1,0 +1,89 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>Hello Solar System 3 -- Note: Not Physically Correct or to Scale</title>
+<meta charset="utf-8"> 
+</head>
+
+    
+<script id="shader-vs" type="x-shader/x-vertex">
+   attribute vec3 aVertexNormal;
+   attribute vec3 aVertexPosition;
+   
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform mat3 uNMatrix;
+    uniform vec3 uLightPosition; // Already in Eye coordinates
+    
+    uniform vec3 uAmbientLightColor;
+    uniform vec3 uDiffuseLightColor;
+    uniform vec3 uSpecularLightColor;
+    
+    uniform vec3 uAmbientMatColor;
+    uniform vec3 uDiffuseMatColor;
+    uniform vec3 uSpecularMatColor;
+    
+    const float shininess = 32.0;
+    
+    varying vec4 vColor;
+
+    void main(void) {
+    
+    
+    // Get the vertex position in eye coordinates
+    vec4 vertexPositionEye4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+    vec3 vertexPositionEye3 = vertexPositionEye4.xyz;
+  
+    // Calculate the vector (l) to the light source
+    vec3 vectorToLightSource = normalize(uLightPosition - vertexPositionEye3);
+    
+    // Transform the normal (n) to eye coordinates
+    vec3 normalEye = normalize(uNMatrix * aVertexNormal);
+    
+    // Calculate n dot l for diffuse lighting
+    float diffuseLightWeighting = max(dot(normalEye, 
+                                    vectorToLightSource), 0.0);
+                                       
+    // Calculate the reflection vector (r) that is needed for specular light
+    vec3 reflectionVector = normalize(reflect(-vectorToLightSource, 
+                                             normalEye));
+    
+    // The camera in eye coordinates is located at the origin and is pointing
+    // along the negative z-axis. Calculate viewVector (v) 
+    // in eye coordinates as:
+    // (0.0, 0.0, 0.0) - vertexPositionEye3
+    vec3 viewVectorEye = -normalize(vertexPositionEye3);
+    
+    float rdotv = max(dot(reflectionVector, viewVectorEye), 0.0);
+    
+    float specularLightWeighting = pow(rdotv, shininess);
+
+    // Sum up all three reflection components and send to the fragment shader
+    vColor = vec4((uAmbientLightColor * uAmbientMatColor)
+                + ((uDiffuseLightColor * uDiffuseMatColor) * diffuseLightWeighting)
+                + ((uSpecularLightColor * uSpecularMatColor) * specularLightWeighting),1.0);
+    
+     
+     gl_Position = uPMatrix*uMVMatrix*vec4(aVertexPosition, 1.0);
+        
+    }
+</script>
+  
+<script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 vColor;
+void main(void) {
+        gl_FragColor = vColor;
+ }
+</script>
+
+<script src="gl-matrix-min.js"></script> 
+<script src="webgl-utils.js"></script>
+<script src="simpleModeling.js"></script>  
+<script src="HelloSolarSystem3.js"></script>   
+<body onload="startup();">
+ <canvas id="myGLCanvas" width="800" height="800"></canvas>
+</body>
+
+</html>

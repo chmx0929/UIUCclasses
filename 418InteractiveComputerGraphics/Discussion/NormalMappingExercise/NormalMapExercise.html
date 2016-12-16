@@ -1,0 +1,326 @@
+<html>
+
+<head>
+<title>Normal Mapping</title>
+<meta http-equiv='content-type' content='text/html; charset=ISO-8859-1'>
+
+
+<!-- MATH Libraries //-->
+<script type='text/javascript' src='js/math/gl-matrix-min.js'></script>
+<!-- WEBGL Libraries //-->
+<script type='text/javascript' src='js/webgl/Globals.js'></script>
+<script type='text/javascript' src='js/webgl/Utils.js'></script>
+<script type='text/javascript' src='js/webgl/Program.js'></script>
+<script type='text/javascript' src='js/webgl/Scene.js'></script>
+<script type='text/javascript' src='js/webgl/Axis.js'></script>
+
+	
+<script type='text/javascript' src='js/webgl/Camera.js'></script>
+<script type='text/javascript' src='js/webgl/CameraInteractor.js'></script>
+<script type='text/javascript' src='js/webgl/SceneTransforms.js'></script>
+<script type='text/javascript' src='js/webgl/Texture.js'></script>
+<script type='text/javascript' src='js/webgl/WebGLApp.js'></script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+//geometry
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+attribute vec3 aVertexTangent;
+attribute vec4 aVertexColor;
+attribute vec2 aVertexTextureCoords;
+
+//matrices
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uNMatrix;
+
+//lights
+uniform vec3 uLightPosition;
+
+//varyings
+varying vec2 vTextureCoord;
+varying vec3 vTangentLightDir;
+varying vec3 vTangentEyeDir;
+
+void main(void) {
+    //Transformed vertex position
+    vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+
+    //Transformed normal position
+    vec3 normal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
+    vec3 tangent = vec3(uNMatrix * vec4(aVertexTangent, 1.0));
+    vec3 bitangent = cross(normal, tangent);
+
+    mat3 tbnMatrix = mat3(
+        tangent.x, bitangent.x, normal.x,
+        tangent.y, bitangent.y, normal.y,
+        tangent.z, bitangent.z, normal.z
+    );
+
+    //light direction, from light position to vertex
+    vec3 lightDirection = uLightPosition - vertex.xyz;
+
+    //eye direction, from camera position to vertex
+    vec3 eyeDirection = -vertex.xyz;
+ 
+    //Final vertex position
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vTextureCoord = aVertexTextureCoords;
+    vTangentLightDir = lightDirection * tbnMatrix;
+    vTangentEyeDir = eyeDirection * tbnMatrix;
+}
+</script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+precision highp float;
+
+//geometry
+uniform vec4 uMaterialDiffuse;
+uniform vec4 uMaterialAmbient;
+
+uniform vec4 uLightAmbient;
+uniform vec4 uLightDiffuse;
+
+//samplers
+uniform sampler2D uSampler;
+uniform sampler2D uNormalSampler;
+
+//varying
+varying vec4 vColor;
+varying vec2 vTextureCoord;
+varying vec3 vTangentLightDir;
+varying vec3 vTangentEyeDir;
+
+void main(void)
+{   
+    // TODO 4
+	
+    // TODO 4a: Unpack tangent-space normal from texture
+
+    // TODO 4b: Normalize the light direction and determine how much light is hitting this point.
+	//          Calculate the diffuse "lambertTerm"
+
+    // TODO 4c: Calculate Specular level
+   
+    vec3 normal = normalize(2.0*(texture2D(uNormalSampler,vTextureCoord).rgb-0.5));
+    
+    vec3 lightDirection = normalize(vTangentLightDir);
+    float lambertTerm = max(dot(normal,lightDirection),0.20);
+    
+    vec3 eyeDirection = normalize(vTangentEyeDir);
+    vec3 reflectDir = reflect(-lightDirection,normal);
+    float Is = pow(clamp(dot(reflectDir, eyeDirection),0.0,1.0), 8.0);
+    
+    // Combine lighting and material colors
+    vec4 Ia = uLightAmbient * uMaterialAmbient;
+    vec4 Id = uLightDiffuse * uMaterialDiffuse * texture2D(uSampler, vTextureCoord) * lambertTerm;
+    
+    gl_FragColor = Ia + Id + Is;
+}
+</script>
+
+<script id='code-js' type="text/javascript">
+
+var camera = null;
+var interactor = null;
+var transforms = null;
+var useVertexColors = false;
+var texture = null;
+var texture2 = null;
+
+function configure(){
+    gl.clearColor(0.3,0.3,0.3, 1.0);
+    gl.clearDepth(100.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LESS);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    
+
+    //Creates and sets up the camera location
+    camera = new Camera(CAMERA_ORBITING_TYPE);
+    camera.goHome([0,0,4]);
+    camera.setFocus([0.0,0.0,0.0]);
+    camera.setAzimuth(45);
+    camera.setElevation(-30);
+    camera.hookRenderer = draw;
+    
+    //Creates and sets up the mouse and keyboard interactor
+    interactor = new CameraInteractor(camera, document.getElementById('canvas-element-id'));
+    
+    //Scene Transforms
+    transforms = new SceneTransforms(camera);
+   
+    //init transforms
+    transforms.init();
+    
+    //Program
+    attributeList = ["aVertexPosition",
+                    "aVertexNormal",
+                    "aVertexTangent",
+                    "aVertexColor",
+                    "aVertexTextureCoords"];
+
+    uniformList = [ "uPMatrix", 
+                    "uMVMatrix", 
+                    "uNMatrix",
+                    "uMaterialDiffuse",
+                    "uMaterialAmbient",
+                    "uLightAmbient",
+                    "uLightDiffuse",
+                    "uLightPosition",
+                    "uWireframe",
+                    "uAlpha",
+                    "uUseVertexColor",
+                    "uUseLambert",
+                    "uSampler",
+                    "uNormalSampler"
+                    ];
+    
+    
+    Program.load(attributeList, uniformList);
+    
+    gl.uniform3fv(Program.uLightPosition,   [0,5,20]);
+    gl.uniform4fv(Program.uLightAmbient,    [1.0,1.0,1.0,1.0]);
+    gl.uniform4fv(Program.uLightDiffuse,    [1.0,1.0,1.0,1.0]);
+    gl.uniform1f(Program.uAlpha, 1.0);
+    gl.uniform1i(Program.uUseVertexColor, useVertexColors);
+    gl.uniform1i(Program.uUseLambert, true);
+    
+    //Init textures
+	 // TODO 1: Define texture 
+       //         Define the texture and image variables. Specify what to do when
+	   //         the textures are loaded, such as binding, setting parameters, etc.
+	   //         
+	
+	   // Texture to apply to the cube
+    	texture = new Texture('textures/fieldstone.jpg');
+	   // The normal map, encoded as a texture
+    	texture2 = new Texture('textures/fieldstone-normal.jpg');
+}
+
+/**
+* Loads the scene
+*/
+function load(){
+    Scene.loadObject('models/geometry/complexCube.json','cube2');
+}
+
+/**
+* invoked on every rendering cycle
+*/
+function draw() {
+    gl.viewport(0, 0, c_width, c_height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    transforms.updatePerspective();
+
+    try{
+        for (var i = 0; i < Scene.objects.length; i++){
+            
+            var object = Scene.objects[i];
+            
+            if (object.hidden == true) continue;
+            
+            transforms.calculateModelView();
+            transforms.push();
+            transforms.setMatrixUniforms();
+            transforms.pop();
+   
+            //Setting uniforms
+            gl.uniform4fv(Program.uMaterialDiffuse, object.diffuse);
+            gl.uniform4fv(Program.uMaterialAmbient, object.ambient);
+
+            //Setting attributes
+            gl.enableVertexAttribArray(Program.aVertexPosition);
+            gl.disableVertexAttribArray(Program.aVertexNormal);
+            gl.disableVertexAttribArray(Program.aVertexTangent);
+            
+            gl.bindBuffer(gl.ARRAY_BUFFER, object.vbo);
+            gl.vertexAttribPointer(Program.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(Program.aVertexPosition);
+            
+            if (object.texture_coords){
+                gl.enableVertexAttribArray(Program.aVertexTextureCoords);
+                gl.bindBuffer(gl.ARRAY_BUFFER, object.tbo);
+                gl.vertexAttribPointer(Program.aVertexTextureCoords, 2, gl.FLOAT, false, 0, 0);
+				
+				// TODO 2: Specify the cube texture as Texture 0
+				//         HINT: You are using multiple textures, and this is texture unit 0
+				// 
+				gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D,texture.tex);
+                gl.uniform1i(Program.uSampler,0);
+				
+                // TODO 3: Specify the normal map texture as Texture 1
+				//         HINT: you are using multiple textures, and this is texture unit 1
+				//
+				gl.activeTexture(gl.TETURE1);
+                gl.bindTexture(gl.TEXTURE_2D, texture2.tex);
+                gl.uniform1i(Program.uNormalSampler,1);
+				
+            }
+            
+            if(!object.wireframe){
+                gl.bindBuffer(gl.ARRAY_BUFFER, object.nbo);
+                gl.vertexAttribPointer(Program.aVertexNormal, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(Program.aVertexNormal);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, object.tanbo);
+                gl.vertexAttribPointer(Program.aVertexTangent, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(Program.aVertexTangent);
+            }
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.ibo);
+            
+            if (object.wireframe){
+                gl.drawElements(gl.LINES, object.indices.length, gl.UNSIGNED_SHORT,0);
+            }
+            else{
+                gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_SHORT,0);
+            }
+            
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+            
+        }
+    }
+    catch(err){
+        alert(err);
+        console.error(err.description);
+    }
+}
+
+
+/**
+* Entry point. This function is invoked when the page is loaded
+*/
+var app = null;
+function runWebGLApp() {
+    app = new WebGLApp("canvas-element-id")
+    app.configureGLHook = configure;
+    app.loadSceneHook   = load;
+    app.drawSceneHook   = draw;
+    app.run();
+}
+</script>
+</head>
+
+<body onLoad='runWebGLApp()'>
+<div id='top'>
+<h1> Normal Mapping Exercise </h1>
+<p></p>
+</div>
+
+<div id='contents'>
+<div id='canvasContainer'>
+<canvas id='canvas-element-id' width='480' height='400'>
+Your browser does not support the HTML5 canvas element.
+</canvas>
+</div>
+</div>
+
+<div id='bottom'>
+
+</div>
+
+<script>cview.run(cview.MODE_VIEW,false,470);</script>
+</body>
+</html>

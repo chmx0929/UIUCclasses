@@ -1,0 +1,48 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>Hello Solar System 3 -- Note: Not Physically Correct or to Scale</title>
+<meta charset="utf-8"> 
+</head>
+
+    
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexNormal;
+    attribute vec3 aVertexPosition;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform mat4 uNMatrix;
+    // uniform vec3 uLightPosition;
+    // uniform vec3 uAmbientLightColor;
+    // uniform vec3 uDiffuseLightColor;
+    // uniform vec3 uSpecularLightColor;
+    // const float shininess = 32.0;
+    // varying vec4 vColor;
+    varying vec3 vVertexNormal;
+    void main(void) {
+        vVertexNormal = aVertexNormal; 
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition,   1.0); 
+    }
+</script>
+  
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    // varying vec4 vColor;
+    uniform samplerCube uCubeSampler; 
+    // varying vec2 vTextureCoord;
+    varying vec3 vVertexNormal; 
+
+    void main(void) {
+        gl_FragColor = textureCube(uCubeSampler,vVertexNormal);;
+    }
+</script>
+
+<script src="gl-matrix-min.js"></script> 
+<script src="webgl-utils.js"></script>
+<script src="simpleModeling.js"></script>  
+<script src="Discussion5Demo_empty.js"></script>   
+<body onload="startup();">
+ <canvas id="myGLCanvas" width="800" height="800"></canvas>
+</body>
+
+</html>

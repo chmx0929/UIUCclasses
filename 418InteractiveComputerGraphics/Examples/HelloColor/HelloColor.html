@@ -1,0 +1,34 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>Hello Triangles</title>
+<meta charset="utf-8"> 
+</head>
+
+    
+<script id="shader-vs" type="x-shader/x-vertex">
+attribute vec4 aVertexColor;
+attribute vec3 aVertexPosition;
+varying vec4 vColor;
+void main(void) {
+    gl_Position = vec4(aVertexPosition, 1.0);
+    vColor = aVertexColor;
+}
+</script>
+  
+<script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 vColor;
+void main(void) {
+        gl_FragColor = vColor;
+ }
+</script>
+
+
+<script src="gl-matrix-min.js"></script>
+<script src="HelloColor.js"></script>   
+<body onload="startup();">
+  <canvas id="myGLCanvas" width="500" height="500"></canvas>
+</body>
+
+</html>

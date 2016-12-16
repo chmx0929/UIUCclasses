@@ -1,0 +1,47 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>Hello Projection</title>
+<meta charset="utf-8"> 
+</head>
+
+         
+   
+<script id="shader-vs" type="x-shader/x-vertex">
+   attribute vec3 aVertexPosition;
+   attribute vec4 aVertexColor;
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    varying vec4 vColor;
+
+    void main(void) {
+        gl_Position = uPMatrix*uMVMatrix*vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+    }
+</script>
+  
+<script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 vColor;
+void main(void) {
+        gl_FragColor = vColor;
+ }
+</script>
+
+<script src="gl-matrix-min.js"></script> 
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script src="HelloProjection.js"></script>   
+<body onload="startup();">
+    <form id="input_form">
+        <fieldset>
+        <legend>Visualization Parameters</legend>
+         Projection
+         <input type="radio" name="projection" id="perspective" value="perspective"checked > Perspective
+         <input type="radio" name="projection" id="ortho" value="ortho"> Orthographic<br>
+        </fieldset>
+        </form>
+  <canvas id="myGLCanvas" width="500" height="500"></canvas>
+</body>
+
+</html>

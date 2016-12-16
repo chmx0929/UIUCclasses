@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<title>MP3: Environment Mapping</title>
+<meta charset="UTF-8">
+ 
+<script type="x-shader/x-vertex" id="vShaderSkyBox">
+     uniform mat4 projection;
+     uniform mat4 modelview;
+     attribute vec3 coords;
+     varying vec3 vCoords;
+     void main() {
+        vec4 eyeCoords = modelview * vec4(coords,1.0);
+        vCoords = coords;
+        gl_Position = projection * eyeCoords;
+     }
+</script>
+<script type="x-shader/x-fragment" id="fShaderSkyBox">
+     precision mediump float;
+     varying vec3 vCoords;
+     uniform samplerCube skybox;
+     void main() {
+          gl_FragColor = textureCube(skybox, vCoords);
+     }
+</script>
+
+<script type="x-shader/x-vertex" id="vShaderTeapot">
+     uniform mat4 projection;
+     uniform mat4 modelview;
+     attribute vec3 coords;
+     attribute vec3 normal;
+     varying vec3 viewCoords;
+     varying vec3 vNormal;
+	 varying vec4 worldPosition;
+     void main() {
+        vec4 eyeCoords = modelview * vec4(coords,1.0);
+        gl_Position = projection * eyeCoords;
+        viewCoords = eyeCoords.xyz;
+        vNormal = normal;
+		worldPosition = eyeCoords;
+     }
+</script>
+<script type="x-shader/x-fragment" id="fShaderTeapot">
+     precision mediump float;
+     varying vec3 vCoords;
+     varying vec3 vNormal;
+     varying vec3 viewCoords;
+	 varying vec4 worldPosition;
+     uniform samplerCube skybox;
+     uniform mat3 normalMatrix;
+     uniform mat3 invVT;
+	 uniform float bllight;
+	 vec4 lightambient = vec4(0.60,0.6,0.6,1.0);
+	 vec4 lightdiffuse =vec4(0.50,0.5,0.5,1.0);
+	 vec4 lightspecular =vec4(0.50,0.5,0.5,1.0);
+	 vec4 ambient = vec4(0.50,0.5,0.5,1.0);
+	 vec4 diffuse = vec4(0.50,0.5,0.5,1.0);
+	 vec4 specular =vec4(0.50,0.5,0.5,1.0);
+	 vec4 lightposition = vec4(0,2,10,1.0);
+	 float attenuate(float dist, float a, float b) {
+        return 1.0 / (1.0 + a*dist + b*dist*dist);
+     }
+     void main() {
+          vec3 N = normalMatrix * vNormal;
+		  float attenuation = attenuate(distance(worldPosition, lightposition)/400.0  , 2.7, 3.0);
+          vec3 V =normalize(lightposition.xyz -viewCoords);
+          vec3 R = 2.0 * dot(V,N) * N - V;
+		  vec3 R1 =R;
+          R = invVT * R; 
+		  vec4 diffuseColor = diffuse * lightdiffuse * max(dot(N,V),0.0) * textureCube(skybox,R) * attenuation;
+		  vec4 specularColor = specular * lightspecular * pow(max(dot(-V,R1),0.0),	128.0) ; 
+		  vec4 gcolor = ( ambient * lightambient + diffuseColor + specularColor);// *textureCube(skybox,R);
+	   if(bllight == 1.0)
+		  gl_FragColor = gcolor;
+	   else
+	       gl_FragColor = textureCube(skybox,R);
+     }
+</script>
+
+<script type="x-shader/x-vertex" id="vShaderNormalTeapot">
+    uniform mat4 projection;
+    uniform mat4 modelview;
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec3 aVertexTangent;
+    attribute vec4 aVertexColor;
+    attribute vec2 aVertexTextureCoords;
+    //matrices
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform mat4 uNMatrix;
+    //lights
+    uniform vec3 uLightPosition;
+    //varyings
+    varying vec2 vTextureCoord;
+    varying vec3 vTangentLightDir;
+    varying vec3 vTangentEyeDir;
+    varying vec3 varyingPosition;
+
+    void main(void) {
+        //Transformed vertex position
+        vec4 vertex = modelview * vec4(aVertexPosition, 1.0);
+
+        vec3 normal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
+        vec3 tangent = vec3(uNMatrix * vec4(aVertexTangent, 1.0));
+        vec3 bitangent = cross(normal, tangent);
+
+        mat3 tbnMatrix = mat3(
+            tangent.x, bitangent.x, normal.x,
+            tangent.y, bitangent.y, normal.y,
+            tangent.z, bitangent.z, normal.z
+        );
+
+        //light direction, from light position to vertex
+        vec3 lightDirection = uLightPosition - vertex.xyz;
+
+        //eye direction, from camera position to vertex
+        vec3 eyeDirection = -vertex.xyz;
+
+        //Final vertex position
+        vec4 eyeCoords = modelview * vec4(aVertexPosition,1.0);
+        gl_Position = projection * eyeCoords;
+        vTextureCoord = aVertexTextureCoords;
+        vTangentLightDir = lightDirection * tbnMatrix;
+        vTangentEyeDir = eyeDirection * tbnMatrix;
+        varyingPosition = eyeCoords.xyz;
+     }
+</script>
+<script type="x-shader/x-fragment" id="fShaderNormalTeapot">
+    precision highp float;
+    //geometry
+    uniform vec4 uMaterialDiffuse;
+    uniform vec4 uMaterialAmbient;
+    uniform vec4 uMaterSpecular;
+    uniform vec4 uLightAmbient;
+    uniform vec4 uLightDiffuse;
+    uniform  vec4 uLightSpecular;
+    uniform float bllight;
+    //samplers
+    uniform sampler2D uSampler;
+    uniform sampler2D uNormalSampler;
+    //varying
+    varying vec4 vColor;
+    varying vec2 vTextureCoord;
+    varying vec3 vTangentLightDir;
+    varying vec3 vTangentEyeDir;
+    varying vec3 varyingPosition;
+
+    void main(void)
+    {   
+        // TODO 4
+
+        // TODO 4a: Unpack tangent-space normal from texture
+
+        // TODO 4b: Normalize the light direction and determine how much light is hitting this point.
+        //          Calculate the diffuse "lambertTerm"
+
+        // TODO 4c: Calculate Specular level
+        vec3 normal = normalize(2.0*(texture2D(uNormalSampler,vTextureCoord).rgb-0.5));
+        vec3 lightDirection = normalize(vTangentLightDir);
+        float lambertTerm = max(dot(normal,lightDirection),0.20);
+        vec3 eyeDirection = normalize(vTangentEyeDir);
+        vec3 reflectDir = reflect(-lightDirection,normal);
+        vec4 Is = uMaterSpecular *uLightSpecular * (pow(max(0.0,dot(reflectDir,eyeDirection)),32.0));
+
+        // Combine lighting and material colors
+        vec4 Ia = uLightAmbient * uMaterialAmbient;// *texture2D(uSampler, vTextureCoord);
+        vec4 Id = uLightDiffuse * uMaterialDiffuse * texture2D(uSampler, vTextureCoord) * lambertTerm;
+
+        gl_FragColor =  Ia+ Id+Is;
+ 
+        if(bllight == 1.0)
+		{
+		  gl_FragColor = Ia+ Id+Is;// textureCube(skybox,R);//;
+		}
+	    else
+	       gl_FragColor =texture2D(uSampler, vTextureCoord);
+    
+   
+   }
+</script>
+
+<script type="text/javascript" src="gl-matrix-min.js"></script>
+<script type="text/javascript" src="loadModel.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type='text/javascript' src='Texture.js'></script>
+
+
+<script type="text/javascript">
+
+var gl;
+    
+var projection = mat4.create();
+var modelview; //view 
+var normalMatrix = mat3.create();
+var invVT = mat3.create();
+var angleInRadians=0; //angle of view change
+var rotY = 0; //roate teapot
+    
+var texID;   // Cubemap texture.
+var cube;    // Skybox
+var teapot;  // Teapot
+var normalModel; // Teapot with normal map
+
+var aCoords_SB;
+var uProjection_SB;     
+var uModelview_SB;
+var prog_SB
+
+var aCoords;
+var aNormal;
+var uProjection;    
+var uModelview;
+var uNormalMatrix;
+var uInvVT;
+var prog;
+
+var aVertexPosition;
+var aVertexNormal;
+var uProjection_NM;
+var uModelview_NM;
+var aVertexTangent;
+var aVertexColor;
+var aVertexTextureCoords;
+var uPMatrix;
+var uMVMatrix; 
+var uNMatrix;
+var uMaterialDiffuse;
+var uMaterialAmbient;
+var uMaterSpecular;
+var uLightAmbient;
+var uLightDiffuse;
+var uLightSpecular;
+var uLightPosition;
+var uSampler;
+var uNormalSampler;
+var prog_NM;
+var LightOnOff;
+    
+var urls = ["images/pos-x.png", "images/neg-x.png", "images/pos-y.png", "images/neg-y.png", "images/pos-z.png", "images/neg-z.png"];
+
+function loadCubeMapFace() {
+    var ct = 0;
+    var img = new Array(6);
+    
+    for (var i = 0; i < 6; i++) {
+        img[i] = new Image();
+        img[i].onload = function() {
+            ct++;
+            if (ct == 6) {
+                texID = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, texID);
+                var targets = [
+                   gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 
+                   gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 
+                   gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z 
+                ];
+                for (var j = 0; j < 6; j++) {
+                    gl.texImage2D(targets[j], 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img[j]);
+                    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                }
+                gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+                draw();
+            }
+        }
+        img[i].src = urls[i];
+    }
+}
+
+// create teapot function-----------------------------------------------------------------------
+function createModel(modelData) {
+    var model = {};
+    model.coordsBuffer = gl.createBuffer();
+    model.normalBuffer = gl.createBuffer();
+    model.indexBuffer = gl.createBuffer();
+    model.count = modelData.indices.length;
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.coordsBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, modelData.vertexPositions, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, modelData.vertexNormals, gl.STATIC_DRAW);
+    console.log(modelData.vertexPositions.length);
+    console.log(modelData.indices.length);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, modelData.indices, gl.STATIC_DRAW);
+    model.render = function() {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.coordsBuffer);
+        gl.vertexAttribPointer(aCoords, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+        gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.uniformMatrix4fv(uModelview, false, modelview );
+        gl.uniformMatrix3fv(uNormalMatrix, false, normalMatrix);
+        gl.uniformMatrix3fv(uInvVT, false, invVT);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_SHORT, 0);
+    }
+    return model;
+}
+    
+// create teapot normal map function-----------------------------------------------------------------------
+function createNormalModel(modelData) {
+    var model = {};
+    model.coordsBuffer = gl.createBuffer();
+    model.normalBuffer = gl.createBuffer();
+    model.indexBuffer = gl.createBuffer();
+    model.textBuffer = gl.createBuffer();
+    model.tangentBuffer = gl.createBuffer();
+    model.count = modelData.indices.length;
+    texture = new Texture('textures/fieldstone.jpg');
+    texture2 = new Texture('textures/fieldstone-normal.jpg');
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.coordsBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, modelData.vertexPositions, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, modelData.vertexNormals, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.textBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, modelData.texture_coords, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, modelData.indices, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.tangentBuffer);
+    var tang=[];
+    tang = CalTangent(modelData.indices,modelData.vertexPositions,modelData.vertexNormals,modelData.texture_coords);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tang), gl.STATIC_DRAW);    
+    model.render = function() {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.coordsBuffer);
+        gl.vertexAttribPointer(aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+        gl.vertexAttribPointer(aVertexNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.tangentBuffer);
+        gl.vertexAttribPointer(aVertexTangent, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.textBuffer);
+        gl.vertexAttribPointer(aVertexTextureCoords, 2, gl.FLOAT, false, 0, 0);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D,texture.tex);
+        gl.uniform1i(uSampler,0);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, texture2.tex);
+        gl.uniform1i(uNormalSampler,1);
+        gl.uniformMatrix4fv(uNMatrix, false,modelview);
+        gl.uniformMatrix4fv(uModelview_NM, false, modelview );
+        gl.uniform3fv(uLightPosition,   [0,1,2]);
+        gl.uniform4fv(uLightAmbient,   [1.0,1.0,1.0,1.0]);
+        gl.uniform4fv(uLightDiffuse,    [1.0,1.0,1.0,1.0]);
+        gl.uniform4fv(uLightSpecular, [1.0,1.0,1.0,1.0]);
+        gl.uniform4fv(uMaterialDiffuse,[1.0,1.0,1.0,1.0     ]);
+        gl.uniform4fv(uMaterialAmbient,[0.50,.500,.50,1.0]);
+        gl.uniform4fv(uMaterSpecular, [1.0,1.0,1.0,1.0]);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    }
+    return model;
+}
+
+// create skybox function-----------------------------------------------------------------------
+function createModelSB(modelData) {
+    var model = {};
+    model.coordsBuffer = gl.createBuffer();
+    model.indexBuffer = gl.createBuffer();
+    model.count = modelData.indices.length;
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.coordsBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, modelData.vertexPositions, gl.STATIC_DRAW);
+    console.log(modelData.vertexPositions.length);
+    console.log(modelData.indices.length);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, modelData.indices, gl.STATIC_DRAW);
+    model.render = function() { 
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.coordsBuffer);
+        gl.vertexAttribPointer(aCoords_SB, 3, gl.FLOAT, false, 0, 0);
+        gl.uniformMatrix4fv(uModelview_SB, false, modelview );
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_SHORT, 0);
+    }
+    return model;
+}
+
+// create shaders--------------------------------------------------------------------------------
+function createProgram(gl, vertexShaderSource, fragmentShaderSource) {
+   var vsh = gl.createShader( gl.VERTEX_SHADER );
+   gl.shaderSource(vsh,vertexShaderSource);
+   gl.compileShader(vsh);
+   if ( ! gl.getShaderParameter(vsh, gl.COMPILE_STATUS) ) {
+      throw "Error in vertex shader:  " + gl.getShaderInfoLog(vsh);
+   }
+   var fsh = gl.createShader( gl.FRAGMENT_SHADER );
+   gl.shaderSource(fsh, fragmentShaderSource);
+   gl.compileShader(fsh);
+   if ( ! gl.getShaderParameter(fsh, gl.COMPILE_STATUS) ) {
+      throw "Error in fragment shader:  " + gl.getShaderInfoLog(fsh);
+   }
+   var prog = gl.createProgram();
+   gl.attachShader(prog,vsh);
+   gl.attachShader(prog, fsh);
+   gl.linkProgram(prog);
+   if ( ! gl.getProgramParameter( prog, gl.LINK_STATUS) ) {
+      throw "Link error in program:  " + gl.getProgramInfoLog(prog);
+   }
+   return prog;
+}   
+
+//set up skybox----------------------------------------------------------------------------
+function initSkyBox(){
+    // create skybox  
+    var vertexShaderSource = getTextContent("vShaderSkyBox"); 
+    var fragmentShaderSource = getTextContent("fShaderSkyBox");
+    prog_SB = createProgram(gl,vertexShaderSource,fragmentShaderSource);
+    aCoords_SB =  gl.getAttribLocation(prog_SB, "coords");
+    uModelview_SB = gl.getUniformLocation(prog_SB, "modelview");
+    uProjection_SB = gl.getUniformLocation(prog_SB, "projection");
+    cube = createModelSB(cube(1000));
+    loadCubeMapFace();
+}
+
+//set up teapot----------------------------------------------------------------------------
+function initTeapot(){
+    var vertexShaderSource = getTextContent("vShaderTeapot"); 
+    var fragmentShaderSource = getTextContent("fShaderTeapot");
+    prog = createProgram(gl,vertexShaderSource,fragmentShaderSource);
+    aCoords =  gl.getAttribLocation(prog, "coords");
+    aNormal =  gl.getAttribLocation(prog, "normal");
+    uModelview = gl.getUniformLocation(prog, "modelview");
+    uProjection = gl.getUniformLocation(prog, "projection");
+	LightOnOff1 = gl.getUniformLocation(prog,"bllight");
+    uNormalMatrix = gl.getUniformLocation(prog, "normalMatrix");
+    uInvVT = gl.getUniformLocation(prog, "invVT");
+    teapot = createModel(teapotModel);
+}
+
+//set up teapot with bump map------------------------------------------------------------------
+function initNormalTeapot(){
+    var vertexShaderSource = getTextContent("vShaderNormalTeapot"); 
+    var fragmentShaderSource = getTextContent("fShaderNormalTeapot");
+    prog_NM = createProgram(gl,vertexShaderSource,fragmentShaderSource);
+    aVertexPosition =  gl.getAttribLocation(prog_NM, "aVertexPosition");
+    aVertexNormal =  gl.getAttribLocation(prog_NM, "aVertexNormal");
+    aVertexTangent =  gl.getAttribLocation(prog_NM, "aVertexTangent");
+    aVertexColor =  gl.getAttribLocation(prog_NM, "aVertexColor");
+    aVertexTextureCoords =  gl.getAttribLocation(prog_NM, "aVertexTextureCoords");
+    uProjection_NM = gl.getUniformLocation(prog_NM, "projection");
+    uModelview_NM = gl.getUniformLocation(prog_NM, "modelview");
+    uPMatrix = gl.getUniformLocation(prog_NM, "uPMatrix");
+    uMVMatrix = gl.getUniformLocation(prog_NM, "uMVMatrix");
+    uNMatrix = gl.getUniformLocation(prog_NM, "uNMatrix");
+    uMaterialDiffuse = gl.getUniformLocation(prog_NM, "uMaterialDiffuse");
+    uMaterialAmbient = gl.getUniformLocation(prog_NM, "uMaterialAmbient");
+    uLightAmbient = gl.getUniformLocation(prog_NM, "uLightAmbient");
+    uLightDiffuse = gl.getUniformLocation(prog_NM, "uLightDiffuse");
+    uLightSpecular = gl.getUniformLocation(prog_NM,"uLightSpecular");
+    uMaterSpecular = gl.getUniformLocation(prog_NM,"uMaterSpecular");
+    uLightPosition = gl.getUniformLocation(prog_NM, "uLightPosition");
+    uSampler = gl.getUniformLocation(prog_NM, "uSampler");
+	LightOnOff2 = gl.getUniformLocation(prog_NM,"bllight");
+    uNormalSampler = gl.getUniformLocation(prog_NM, "uNormalSampler");
+    normalModel = createNormalModel(teapotModel);
+}
+
+function getTextContent( elementID ) {
+    var element = document.getElementById(elementID);
+    var fsource = "";
+    var node = element.firstChild;
+    var str = "";
+    while (node) {
+        if (node.nodeType == 3)
+            str += node.textContent;
+        node = node.nextSibling;
+    }
+    return str;
+}
+    
+function draw() {
+    gl.clearColor(0,0,0,1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    mat4.perspective(projection, Math.PI/3, 1, 10, 2000);
+    //view rotation
+    var c = Math.cos(angleInRadians);
+    var s = Math.sin(angleInRadians);
+    modelview = new Float32Array([ 
+            c, 0, s, 0,
+            0, 1, 0, 0,
+           -s, 0, c, 0,
+	        0, 0, -40, 1 ]);
+    mat3.normalFromMat4(normalMatrix, modelview);
+    // Draw skybox
+    gl.useProgram(prog_SB);
+    gl.uniformMatrix4fv(uProjection_SB, false, projection);
+    if (texID) {
+        gl.enableVertexAttribArray(aCoords_SB);
+        cube.render();  
+        gl.disableVertexAttribArray(aCoords_SB);
+    }
+    mat3.fromMat4(invVT, modelview);
+    mat3.invert(invVT,invVT);
+    //roate teapot around y axis
+    mat4.rotateY(modelview,modelview,rotY);     
+    mat3.normalFromMat4(normalMatrix, modelview);
+    if(document.getElementById("n").checked){
+        // Draw teapot
+        gl.useProgram(prog);
+        gl.uniformMatrix4fv(uProjection, false, projection);
+        if (texID) {
+            gl.enableVertexAttribArray(aCoords);
+            gl.enableVertexAttribArray(aNormal);
+            teapot.render();  
+            gl.disableVertexAttribArray(aCoords);
+            gl.disableVertexAttribArray(aNormal);
+        }
+    }
+    else if(document.getElementById("m").checked){
+        // Draw normal map teapot
+        gl.useProgram(prog_NM);
+        gl.uniformMatrix4fv(uProjection_NM, false, projection);
+        if (texID) {
+            gl.enableVertexAttribArray(aVertexPosition);
+            gl.enableVertexAttribArray(aVertexNormal);
+            gl.enableVertexAttribArray(aVertexTextureCoords);
+            gl.enableVertexAttribArray(aVertexTangent);
+            normalModel.render();  
+            gl.disableVertexAttribArray(aVertexPosition);
+            gl.disableVertexAttribArray(aVertexNormal);
+            gl.disableVertexAttribArray(aVertexTextureCoords);
+            gl.disableVertexAttribArray(aVertexTangent);
+        }   
+    }
+}
+
+function start(){
+    var canvas = document.getElementById("glcanvas");
+    gl = canvas.getContext("webgl");
+    if ( ! gl ) {
+        gl = canvas.getContext("experimental-webgl");
+        throw "Could not create WebGL context.";
+    }
+    gl.enable(gl.DEPTH_TEST);
+    //set up skybox 
+    initSkyBox();
+    //set up teapot
+    initTeapot();
+    //set up teapot with bump map
+    initNormalTeapot();
+    tick();
+}
+    
+function animate() {
+    //change view in an orbit around the teapot
+    angleInRadians = angleInRadians+0.005;
+    
+    //rotate the teapot
+    if(document.getElementById("a").checked){
+        rotY = rotY + 0.03;
+    }
+    else if(document.getElementById("c").checked){
+        rotY = rotY - 0.03;
+    }
+    
+    //turn on or off light
+    if  (document.getElementById("on").checked)
+	{
+	    gl.uniform1f(LightOnOff1,1.0);
+	    gl.uniform1f(LightOnOff2,1.0);
+	}
+	else if(document.getElementById("off").checked)
+	{
+	    gl.uniform1f(LightOnOff1,0.0);
+	    gl.uniform1f(LightOnOff2,0.0);
+	}
+}
+
+function tick() {
+    requestAnimFrame(tick);
+    draw();
+    animate();
+}
+
+
+function init() {
+    //read text file to get data
+    readTextFile('teapot_0.obj',extractData);
+}
+
+
+</script>
+</head>
+<body onload="init()">
+    <canvas width=1000 height=600 id="glcanvas"></canvas>
+    <form id="RotateForm">
+        <input type="radio" name="normalMap" id="a" value="a">  Rotate Teapot Anticlockwise
+        <input type="radio" name="normalMap" id="c" value="c" checked> Rotate Teapot Clockwise
+    </form>
+    <form id="NormalMapForm">
+        <input type="radio" name="normalMap" id="m" value="m" >  Normal Mapping
+        <input type="radio" name="normalMap" id="n" value="n" checked> Non-Normal Mapping
+    </form>
+	<form id = "light">
+	    <input type="radio" name="light" id="on" value="open light"  checked>  open lighting
+        <input type="radio" name="light" id="off" value="off light" > off lighting
+	</form>
+</body>
+</html>
