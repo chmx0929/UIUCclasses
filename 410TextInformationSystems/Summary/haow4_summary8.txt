@@ -1,0 +1,18 @@
+##Entropy
+##Conditional entropy
+##Mutual information
+##Topic and coverage of topic
+##Language model
+##Generative model
+##Unigram language model
+##Word distribution
+##Background language model
+##Parameters of a probabilistic model
+##Likelihood
+##Bayes rule
+##Maximum likelihood estimation
+##Prior and posterior distributions
+##Bayesian estimation & inference
+##Maximum a posteriori (MAP) estimate
+##Prior model
+##Posterior mode

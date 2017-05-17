@@ -1,0 +1,8 @@
+##Part of speech tagging
+##Syntactic analysis
+##Semantic analysis
+##Ambiguity
+##Text representation, especially bag-of-words representation
+##Context of a word; context similarity
+##Paradigmatic relation
+##Syntagmatic relation

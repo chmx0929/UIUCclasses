@@ -1,0 +1,11 @@
+##document frequency (DF) and inverse document frequency (IDF)
+##term frequency (TF): The count of term in document
+##inverse document frequency (IDF): IDF(W) = log[(M+1)/k] M: total number of docs in collection, k: total number of docs containing W
+##TF transformation: term frequency weight, BM25(one of the best to calculate TF weight)
+##BM25: y= (k+1)x/x+k, upper bound k+1
+##pivoted length normalization: using avg doc length, 1-b+b*|d|/avg length  0<=b=>1
+##inverted index and postings
+##binary coding, unary coding, gamma-coding, and d-gap
+##zipf’s law: rank * frequency = constant
+
+!!C   Which is the best match of the word "the" in general documents? A.high TF, high IDF B.low TF,high IDF C.high TF, low IDF D.low TF, low IDF

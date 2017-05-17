@@ -1,0 +1,11 @@
+##Clustering, document clustering, and term clustering
+##Clustering bias
+##Perspective of similarity
+##Mixture model, likelihood, and maximum likelihood estimation
+##EM algorithm, E-step, M-step, underflow, normalization (to avoid underflow)
+##Hierarchical Agglomerative Clustering, and k-Means
+##Direction evaluation (of clustering), indirect evaluation (of clustering)
+##Text categorization, topic categorization, sentiment categorization, email routing
+##Spam filtering
+##Naïve Bayes classifier
+##Smoothing

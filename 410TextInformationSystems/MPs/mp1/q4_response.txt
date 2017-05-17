@@ -1,0 +1,2 @@
+We can use the technique of TF transformation to combat “concept spam”. We can give a high score for the first present of a word.
+After that, the more times that word shows up, the less score it gains.

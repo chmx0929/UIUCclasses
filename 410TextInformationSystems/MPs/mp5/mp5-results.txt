@@ -1,0 +1,51 @@
+Q1.1:
+accuracy=0.866
+CHN:0.907
+ENS:0.863
+HKG:0.755
+IDN:0.838
+JPN:0.949
+KOR:0.747
+PAK:0.93
+PHL:0.858
+SIN:0.925
+THA:0.901
+TWN:0.703
+Q1.2:
+To determine two classes that are often mistaken for each other by the classifier, we can find the class of highest value for each row(class) except itself(predicted correctly). If there are two classes that the class of highest value for each class except itself is each other, we determine that these two classes that are often mistaken for each other by the classifier.
+Q2.1:
+#k=5
+accuracy=0.89
+CHN:0.943
+ENS:0.887
+HKG:0.68
+IDN:0.868
+JPN:0.98
+KOR:0.845
+PAK:0.94
+PHL:0.863
+SIN:0.922
+THA:0.92
+TWN:0.69
+#k=10
+accuracy=0.896
+CHN:0.95
+ENS:0.895
+HKG:0.665
+IDN:0.89
+JPN:0.973
+KOR:0.842
+PAK:0.953
+PHL:0.843
+SIN:0.932
+THA:0.934
+TWN:0.72
+Q2.2:
+10-fold cross validation would give a higher accuracy. It is consistent with my results. Since it divides data into more parts, it trains and verifies more times. So it is possible that 10-fold cross validation would give a higher accuracy.
+Q3.1:
+accuracy=0.906
+Q3.2:
+##evaluation:
+Bigram features improve performance. Advantages: it may obtain better performance because it can use single word(unigram) and two-words phrases(bigram) to analyze text data. Limitations: it is obvious that text is not only consist of single word(unigram) and two-word phrases(bigram) but three-words phrases, four-words phrases,etc. So bigram features are hard to handle other situation.
+##comment:
+Use semantic unit(both single word - unigram and multi-word phrases - ngram) as basic unit. Since in reality people use semantic unit as basic unit to analyze text information, we would get obtain better performance if we change basic unit closer to what people usually do.

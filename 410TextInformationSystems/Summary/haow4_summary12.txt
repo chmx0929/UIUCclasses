@@ -1,0 +1,18 @@
+##Aspect rating and aspect weight
+##Latent Aspect Rating Analysis (LARA)
+##Latent rating regression model
+##Generative model
+##Rating prediction
+##Normal/Gaussian distribution
+##Prior probability
+##Posterior probability
+##Text-based prediction
+##The “data mining loop”
+##Context (of text data) and contextual text mining
+##Contextual probabilistic latent semantic analysis (CPLSA): views of a topic and coverage of topics
+##Spatiotemporal trends of topics
+##Event impact analysis
+##Network-regularized topic modeling
+##NetPLSA
+##Causal topics
+##Iterative topic modeling with time series supervision

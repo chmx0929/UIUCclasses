@@ -1,0 +1,187 @@
+Q1: -8.13228e+07 -7.9853e+07 -8.13066e+07 -7.91422e+07 -8.01854e+07 -7.84376e+07
+========== Topic 0 ==========
+ router 0.0854969
+ wireless 0.026246
+ firmware 0.0226764
+ linksys 0.0112363
+ network 0.0111056
+ wrt 0.00912599
+ routers 0.00901245
+ dd 0.00891792
+ signal 0.00881527
+ netgear 0.00699707
+========== Topic 1 ==========
+ drive 0.0210312
+ ssd 0.00975447
+ card 0.00927163
+ wd 0.00816121
+ drives 0.00811335
+ quiet 0.00697377
+ seagate 0.00681561
+ amd 0.00630732
+ sata 0.00626963
+ board 0.00577621
+========== Topic 2 ==========
+ board 0.0149761
+ psu 0.0121931
+ monitor 0.0117785
+ supply 0.010584
+ power 0.00666268
+ modular 0.00567405
+ connectors 0.00540317
+ motherboard 0.00513986
+ quiet 0.00505997
+ bios 0.00498773
+
+ Q2.1
+========== Topic 0 ==========
+ software 0.023165
+ users 0.0143314
+ web 0.0139741
+ services 0.0120968
+ and 0.0112783
+ user 0.0110347
+ systems 0.00930733
+ system 0.00910086
+ service 0.00851028
+ development 0.00782625
+ design 0.00646939
+ business 0.00616362
+ mobile 0.00612058
+ social 0.00609461
+ interaction 0.00558865
+ architecture 0.00539745
+ to 0.00530889
+ research 0.0051482
+ information 0.00501638
+ agent 0.00485391
+========== Topic 1 ==========
+ image 0.0243155
+ search 0.0145666
+ learning 0.0142559
+ images 0.013788
+ retrieval 0.0124112
+ similarity 0.0104316
+ query 0.010269
+ web 0.0101892
+ classification 0.0096432
+ clustering 0.00929949
+ text 0.00907531
+ documents 0.00831861
+ document 0.00727524
+ ranking 0.00727189
+ method 0.00703256
+ training 0.00667466
+ motion 0.00641569
+ recognition 0.00621624
+ the 0.00600894
+ algorithm 0.0055414
+========== Topic 2 ==========
+ n 0.0536174
+ & 0.051079
+ o 0.0336403
+ ( 0.0335752
+ ) 0.0325746
+ k 0.0304402
+ [ 0.0298888
+ ] 0.0278534
+ > 0.0218272
+ algorithm 0.0201433
+ \ 0.0194132
+ ; 0.01938
+ $ 0.0182048
+ { 0.0177946
+ p 0.0177813
+ } 0.0177412
+ < 0.0155465
+ 1 0.0139404
+ t 0.0139388
+ d 0.0137698
+========== Topic 3 ==========
+ sensor 0.0231308
+ network 0.0215788
+ protocol 0.0153246
+ networks 0.0149129
+ security 0.0133499
+ routing 0.0132996
+ wireless 0.0118634
+ protocols 0.0117929
+ traffic 0.0116734
+ nodes 0.0109895
+ code 0.00950742
+ peer 0.00917156
+ distributed 0.0075131
+ attacks 0.00734411
+ mobile 0.00703676
+ system 0.00677583
+ java 0.00649544
+ program 0.00640167
+ fault 0.00638456
+ communication 0.00583711
+========== Topic 4 ==========
+ cache 0.0320239
+ memory 0.0262157
+ % 0.02419
+ performance 0.0203719
+ processor 0.0158262
+ energy 0.0149785
+ chip 0.0116488
+ processors 0.0112743
+ scheduling 0.0107929
+ hardware 0.0106437
+ instruction 0.00970156
+ execution 0.00950146
+ - 0.00932005
+ compiler 0.00775775
+ power 0.00727286
+ consumption 0.00721848
+ parallel 0.00719485
+ code 0.0070632
+ architecture 0.00696485
+ system 0.00664652
+========== Topic 5 ==========
+ query 0.0310302
+ queries 0.0196621
+ xml 0.0163794
+ data 0.0104817
+ database 0.0102804
+ schema 0.00919549
+ mining 0.00907515
+ logic 0.00854457
+ language 0.00850538
+ relational 0.00784685
+ rules 0.00758589
+ semantics 0.00732297
+ databases 0.00615983
+ of 0.00588477
+ temporal 0.00513302
+ checking 0.00500539
+ join 0.0049021
+ languages 0.00445436
+ programs 0.00443228
+ tree 0.00419965
+
+ Topic 0: software
+ Topic 1: data mining
+ Topic 2: algorithm
+ Topic 3: network
+ Topic 4: computer architecture
+ Topic 5: database
+
+ Q2.2
+========== doc_id 0 topic distribution ==========
+[ 0.0698819   0.00098425  0.00098425  0.00098425  0.00098425  0.926181  ]
+========== doc_id 1 topic distribution ==========
+[  7.23101000e-01   5.80169000e-03   5.27426000e-04   2.27321000e-01
+   5.27426000e-04   4.27215000e-02]
+========== doc_id 2 topic distribution ==========
+[ 0.0164577  0.447492   0.0007837  0.0007837  0.0007837  0.533699 ]
+========== doc_id 3 topic distribution ==========
+[  1.35404000e-01   5.86166000e-04   1.82298000e-01   5.86166000e-04
+   5.86166000e-04   6.80539000e-01]
+========== doc_id 4 topic distribution ==========
+[ 0.48408     0.00058962  0.00058962  0.00058962  0.00648585  0.507665  ]
+##Comment: I think the result does make sense because it shows reasonable probabilities of each topic for each doc, such as Doc 0 mainly uses topic 5 words, we get high probability it belongs to topic 5; Doc 4 mainly uses topic 0 and 5 words, we get high probability it belongs to topic 0 and 5... 
+
+ Q3
+I think we can do it in this way that find topical trends based on new words appear in top words distribution and the words whose rank arise. By analyzing these two type words (new words and words whose rank arise), we can generate topical trends (new trend in exist field or new field topics).

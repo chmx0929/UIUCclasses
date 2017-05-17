@@ -1,0 +1,9 @@
+##Learning to rank, features, and logistic regression
+##Content-based filtering
+##Collaborative filtering
+##Beta-gamma threshold learning
+##Linear utility
+##User profile
+##Exploration-exploitation tradeoff
+##Memory-based collaborative filtering
+##Cold start

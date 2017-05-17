@@ -1,0 +1,15 @@
+## NLP(natural language processing): lexical analysis, semantic analysis, pragmatic analysis
+## pull model: search Engine (users initiative, ad hoc information), querying, browsing
+## push model: recommender system (systems initiative, stable information)
+## vector space model: dimension, vector placement, similarity instantiation
+## text retrieval
+## database retrieval
+## querying
+## browsing
+## bag of words
+## document selection
+## document ranking
+## retrieval model
+## term frequency
+
+!!C Which of the following is not a part of NLP?(A)lexical analysis (B)semantic analysis (C)meaning analysis (D)pragmatic analysis

@@ -1,0 +1,10 @@
+prefix = "."
+dataset = "cranfield"
+corpus = "line.toml"
+index = "idx"
+query-judgements = "cranfield-qrels.txt"
+
+[[analyzers]]
+method = "ngram-word"
+ngram = 1
+filter = [{type = "icu-tokenizer"}, {type = "lowercase"}]

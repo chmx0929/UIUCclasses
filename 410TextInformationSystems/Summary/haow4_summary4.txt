@@ -1,0 +1,8 @@
+##p(R=1|q,d)
+##query likelihood
+##Statistical and unigram language models
+##Maximum likelihood estimate
+##Background, collection, and document language models
+##Smoothing of unigram language models
+##Linear interpolation smoothing
+##Dirichlet Prior smoothing

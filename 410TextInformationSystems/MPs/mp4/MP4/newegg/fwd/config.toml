@@ -1,0 +1,12 @@
+index = "newegg"
+corpus = "line.toml"
+dataset = "newegg"
+prefix = "."
+stop-words = "lemur-stopwords.txt"
+[[analyzers]]
+	ngram = 1
+	method = "ngram-word"
+	[[analyzers.filter]]
+		type = "icu-tokenizer"
+	[[analyzers.filter]]
+		type = "lowercase"

@@ -1,0 +1,4 @@
+According to these lists of highly ranked terms, we can easily get that the important concepts of week1 are “pivot_length_normal”, “document_length_normal”, and “vector_space_model”. And “mean_reciprocal_rank” is the most important term for week2. To make the 
+analysis better, we can ignore some common words. In other words, we should only keep academic term. Besides, we the order of words 
+should be ignore in some cases. For example, I notice that “mean_reciproc_rank”, “reciproc_rank_mean”, and “rank_mean_reciproc” 
+show up in week2 trigram. These three terms represent same thing. It would be better we count them as one academic term. 

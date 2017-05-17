@@ -1,0 +1,13 @@
+##Relevance feedback
+##Pseudo-relevance feedback
+##Implicit feedback
+##Rocchio feedback
+##Kullback-Leiber divergence (KL-divergence) retrieval function
+##Mixture language model
+##Scalability and efficiency
+##Spams
+##Crawler, focused crawling, and incremental crawling
+##Google File System (GFS)
+##MapReduce
+##Link analysis and anchor text
+##PageRank and HITS

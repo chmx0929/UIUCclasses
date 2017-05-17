@@ -1,0 +1,21 @@
+inverted-index = "icnale-inv"
+stop-words = "lemur-stopwords.txt"
+index = "idx"
+forward-index = "icnale-fwd"
+corpus = "line.toml"
+dataset = "icnale"
+prefix = "."
+[[analyzers]]
+	ngram = 1
+	method = "ngram-word"
+	[[analyzers.filter]]
+		type = "icu-tokenizer"
+	[[analyzers.filter]]
+		type = "lowercase"
+[[analyzers]]
+	ngram = 2
+	method = "ngram-word"
+	[[analyzers.filter]]
+		type = "icu-tokenizer"
+	[[analyzers.filter]]
+		type = "lowercase"

@@ -1,0 +1,10 @@
+##Mixture model
+##Component model
+##Constraints on probabilities
+##Probabilistic Latent Semantic Analysis (PLSA)
+##Expectation-Maximization (EM) algorithm
+##E-step and M-step
+##Hidden variables
+##Hill climbing
+##Local maximum
+##Latent Dirichlet Allocation (LDA)

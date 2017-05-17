@@ -1,0 +1,11 @@
+##Generative classifier vs. discriminative classifier
+##Training data
+##Logistic regression
+##K-Nearest Neighbor classifier
+##Support Vector Machine (SVM), margin, and linear separator
+##Classification accuracy, precision, recall, F measure, macro-averaging, and micro-averaging
+##Opinion holder, opinion target, sentiment, and opinion representation
+##Sentiment classification
+##Features, n-grams, frequent patterns, and overfitting
+##Ordinal logistic regression
+##Rating prediction

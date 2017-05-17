@@ -1,0 +1,12 @@
+index = "abstracts"
+corpus = "line.toml"
+dataset = "abstracts"
+prefix = "."
+stop-words = "lemur-stopwords.txt"
+[[analyzers]]
+	ngram = 1
+	method = "ngram-word"
+	[[analyzers.filter]]
+		type = "icu-tokenizer"
+	[[analyzers.filter]]
+		type = "lowercase"
