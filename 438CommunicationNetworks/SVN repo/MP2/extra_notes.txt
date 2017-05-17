@@ -1,0 +1,32 @@
+To set an initial topology, run perl make_topology.pl thetopofile (an example topology file is provided).
+This will set the connectivity between nodes. To give them their initial costs, provide each with an
+initialcosts file (examples of these are provided as well. See the spec document for more details on all
+file formats). You can just give them all an empty file, if you want all links to default to cost 1.
+
+To make the nodes send messages, or change link costs while the programs are running, use manager_send.
+
+To bring links up and down while running:
+e.g. to bring the link between nodes 1 and 2 up: 
+sudo iptables -I OUTPUT -s 10.1.1.1 -d 10.1.1.2 -j ACCEPT ; sudo iptables -I OUTPUT -s 10.1.1.2 -d 10.1.1.1 -j ACCEPT
+
+To take that link down:
+sudo iptables -D OUTPUT -s 10.1.1.1 -d 10.1.1.2 -j ACCEPT ; sudo iptables -D OUTPUT -s 10.1.1.2 -d 10.1.1.1 -j ACCEPT
+
+
+
+
+log file format:
+sprintf(logLine, "sending packet dest %d nexthop %d message %s\n", dest, nexthop, message);
+sprintf(logLine, "forward packet dest %d nexthop %d message %s\n", dest, nexthop, message);
+sprintf(logLine, "receive packet message %s\n", message);
+sprintf(logLine, "unreachable dest %d\n", dest);
+
+... and then fwrite(logLine, 1, strlen(logLine), theLogFile);
+
+If that's all you do to the log file, you will have the correct format. (Don't worry about closing it; 
+when your process gets killed, any output should be flushed + the file will be closed).
+
+
+TO MAKE THE AUTOTESTER NOTICE YOU:
+To have the tester test your LS implementation (binary must be named ls_router), commit a file called "testls".
+To have the tester test your DV/PV implementation (binary must be named vec_router), commit "testvec".
