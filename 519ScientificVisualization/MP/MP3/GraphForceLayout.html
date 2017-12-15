@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- //University of Illinois/NCSA Open Source License>
+Copyright (c) 2015 University of Illinois
+All rights reserved.
+Developed by: 	  Eric Shaffer
+                  Department of Computer Science
+                  University of Illinois at Urbana Champaign
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+disclaimers.Redistributions in binary form must reproduce the above copyright notice, this list
+of conditions and the following disclaimers in the documentation and/or other materials provided with the distribution.
+Neither the names of <Name of Development Group, Name of Institution>, nor the names of its contributors may be
+used to endorse or promote products derived from this Software without specific prior written permission.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS WITH THE SOFTWARE. -->
+
+
+
+<head>
+<meta charset="utf-8">
+    <title>CS 519: Scientific Visualization: Force-Directed Graph Layout</title>
+</head>
+	<body onload="main()">
+        <form id="input_form">
+        <fieldset>
+        <legend>Graph Layout Parameters</legend>
+         Maximum movement <input type="text" id="t" value="100.0"><br><br>
+         Damping value <input type="text" id="delta_t" value="0.999"><br><br>
+         Number of iterations <input type="text" id="num_iter" value="100"><br><br>
+         Use default k value <input type="checkbox" id="default_k"><br>
+         User-provided k value<input type="text" id="k" value="50"><br><br>
+         Vertex diameter<input type="text" id="v_size" value="5"><br><br>
+         Edge thickness<input type="text" id="e_size" value="1"><br><br>
+         Test graph <input type="checkbox" id="test"><br>
+        </fieldset>
+        </form>
+        <button onclick="render()">Render</button>
+		<canvas id ="example" width ="640" height ="480" style="border:5px solid #FFFFFF;">
+			Please use a browser that supports "canvas"
+		</canvas >
+
+<script>
+//------------------------------------------------------
+// Change these functions!!	
+	
+var width = 640,
+    height = 480;
+var A = width*height; //canvas size
+var C = 0.3;
+var k = 50;
+var N = 10;
+var num_iter = 100;
+var v_size = 5;
+var e_size = 1;
+var graph = random_cycle(N,width,height);
+var t = 100.0;
+var delta_t = 0.999;
+var back = false;
+var test = {
+    "nodes": [  { "x": 208.992345, "y": 273.053211 },
+                { "x": 595.98896,  "y":  56.377057 },
+                {"x": 77.11221061385037, "y": 165.81071038912677},
+                {"x": 133.37957632691126, "y": 105.9037011654712},
+                {"x": 214.9941294365167, "y": 85.9631504214394},
+                {"x": 295.1135699588844, "y": 110.1433539766036},
+                {"x": 345.8212856147237, "y": 174.03685494065311},
+                {"x": 341.5482207711961, "y": 254.3866466050868},
+                {"x": 285.2005923712419, "y": 314.1438708289835},
+            ],
+    "edges": [  { "target": 1, "source":  0 },
+                { "target": 2, "source":  0 },
+                { "target": 3, "source":  0 },
+                { "target": 4, "source":  0 },
+                { "target": 5, "source":  1 },
+                { "target": 6, "source":  1 },
+                { "target": 7, "source":  1 },
+                { "target": 8, "source":  1 },
+            ]
+    };
+
+function random_cycle(n,lim_x,lim_y)
+{
+    var edges=[];
+    for(var i=0;i<n;i++)
+    {
+        edge = {"target":(i+1) % n, "source":i};
+        edges.push(edge);
+    }
+    var nodes=[];
+    for(var i=0;i<n;i++)
+    {
+        var rand_x = Math.random()*lim_x;
+        var rand_y = Math.random()*lim_y;
+        node = {"x": rand_x, "y": rand_y};
+        nodes.push(node);
+    }
+    var g = {"nodes":nodes,"edges":edges};
+    return g;
+}
+
+function draw_graph(ctx,graph)
+{
+    ctx.clearRect(0, 0, 640, 480);
+    var nodes = graph["nodes"]
+    var edges = graph["edges"]
+    // Draw the edges
+    for (var i=0;i<edges.length;i++)
+    {
+        var e = edges[i];
+        var vidx=e["source"]
+        x1 = nodes[vidx]["x"];
+        y1 = nodes[vidx]["y"];
+        vidx=e["target"]
+        x2 = nodes[vidx]["x"];
+        y2 = nodes[vidx]["y"];
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.lineWidth = e_size;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+    }
+     // Draw the vertices
+    for (var i=0;i<nodes.length;i++)
+    {
+        var node = nodes[i]
+        var radius = v_size/2;
+        x = node["x"];
+        y = node["y"];
+        ctx.beginPath();
+        ctx.arc(x,y,radius,0,2*Math.PI);
+        ctx.fillStyle = '#FF0000';
+        ctx.fill();
+    }
+}
+
+function delta(node1,node2){
+    return [node2["x"] - node1["x"],node2["y"] - node1["y"]];
+}
+
+function distance(delta_x,delta_y){
+    return Math.sqrt(Math.pow(delta_x,2)+Math.pow(delta_y,2));
+}
+
+function fr(z){
+    return -Math.pow(k,2)/z;
+}
+
+function fa(z){
+    return Math.pow(z,2)/k;
+}
+
+function sign(number){
+    return number/Math.sqrt(Math.pow(number,2));
+}
+
+function update_positions(ctx,graph,timer)
+{
+    var disp_vecoter = [];
+    for (var i = 0; i < graph["nodes"].length; i++) {
+        disp_vecoter.push({"x":0,"y":0});
+    }   
+    for (var i = 0; i < graph["nodes"].length; i++) {
+        for (var j = 0; j < graph["nodes"].length; j++) {
+            if (i!=j) {
+                var delta_x = delta(graph["nodes"][i],graph["nodes"][j])[0];
+                var delta_y = delta(graph["nodes"][i],graph["nodes"][j])[1];
+                var dist = distance(delta_x,delta_y);
+                var repulsive = fr(dist);
+                disp_vecoter[i]["x"] += repulsive/dist*delta_x;
+                disp_vecoter[i]["y"] += repulsive/dist*delta_y;
+            }
+        }
+    }
+    for (var i = 0; i < graph["edges"].length; i++) {
+        var source = graph["edges"][i]["source"];
+        var target = graph["edges"][i]["target"];
+        if (source!=target) {
+            var delta_x = delta(graph["nodes"][source],graph["nodes"][target])[0];
+            var delta_y = delta(graph["nodes"][source],graph["nodes"][target])[1];
+            var dist = distance(delta_x,delta_y);
+            var attractive = fa(dist);
+            var disp_x = attractive/dist*delta_x;
+            var disp_y = attractive/dist*delta_y;
+            disp_vecoter[target]["x"] -= disp_x;
+            disp_vecoter[target]["y"] -= disp_y;
+            disp_vecoter[source]["x"] += disp_x;
+            disp_vecoter[source]["y"] += disp_y;
+        }
+    }
+    for (var i = 0; i < graph["nodes"].length; i++) {
+        graph["nodes"][i]["x"] += sign(disp_vecoter[i]["x"])*Math.min(Math.abs(disp_vecoter[i]["x"])*0.04,t*Math.pow(delta_t,timer));
+        graph["nodes"][i]["y"] += sign(disp_vecoter[i]["y"])*Math.min(Math.abs(disp_vecoter[i]["y"])*0.04,t*Math.pow(delta_t,timer));
+    }
+    draw_graph(ctx,graph);
+}
+
+//MAIN
+function main() {
+    render();
+}
+
+function render(){
+    var canvas = document.getElementById('example');
+    if (! canvas) {
+        console.log(' Failed to retrieve the < canvas > element');
+        return false;
+    }
+    else {
+	    console.log(' Got < canvas > element ');
+    }
+    // Get the rendering context for 2DCG <- (2)
+    var ctx = canvas.getContext('2d');
+    v_size = document.getElementById("v_size").value;
+    e_size = document.getElementById("e_size").value;
+    num_iter = document.getElementById("num_iter").value;
+    t = parseFloat(document.getElementById("t").value);
+    delta_t = parseFloat(document.getElementById("delta_t").value);
+    if (document.getElementById("default_k").checked){
+        k = C*Math.sqrt(A/N);
+    }else{
+        k = parseFloat(document.getElementById("k").value);
+    }
+    if (document.getElementById("test").checked){
+        graph = test;
+        back = true;
+    }else if(back){
+        graph = random_cycle(N,width,height);
+        back = false;
+    }
+    var timer = 0;
+    var myVar = setInterval(function(){
+        update_positions(ctx,graph,timer);
+        timer++;
+        if (num_iter==timer) {clearInterval(myVar);}
+    }, 100);
+}
+    </script>
+	</body>
+</html>

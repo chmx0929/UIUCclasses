@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src ="LIC.js" ></script>
+<head>
+	<title>CS 519: Scientific Visualization MP2</title>
+</head>
+<body  onload="main()">
+	<form id="input_form">
+        <fieldset>
+        	<legend>Parameters</legend>
+         	L: the LIC line length <input type="text" id="L" value="4"><br>
+         	K: the hedgehog line scaling factor <input type="text" id="K" value="0.1"><br>
+         	Grid size: determines number of samples for the hedgehog plot <input type="text" id="G" value="10"><br>
+         	Color on/off: color according to magnitude <input type="checkbox" id="color"><br>
+         	Hedgehog on/off: toggle on or off the hedgehog lines <input type="checkbox" id="hedgehog"><br>         
+         	Hedgehog Style: 
+         	<input type="radio" name="Hedgehog" id="sample" value="sample "checked > Sample
+         	<input type="radio" name="Hedgehog" id="random" value="random"> Random<br>
+        </fieldset>
+    </form>
+    <button onclick="render()">Render</button>
+	<canvas id ="example" width ="400" height ="400">
+		Please use a browser that supports "canvas"
+	</canvas >
+</body>
+</html>
